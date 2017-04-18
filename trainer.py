@@ -10,6 +10,8 @@ from tensorflow.examples.tutorials.mnist import input_data
 from tensorflow.python.saved_model import builder as saved_model_builder
 from tensorflow.python.saved_model import tag_constants
 
+from models import model_fn
+
 import tensorflow as tf
 
 
@@ -17,13 +19,13 @@ def main(_):
 	mnist = input_data.read_data_sets("MNIST_data/", one_hot=True)
 
 	x = tf.placeholder(tf.float64, [None, 784])
+	y_ = tf.placeholder(tf.float64, [None, 10])
 
 	W = tf.Variable(tf.zeros([784, 10], dtype=tf.float64))
 	b = tf.Variable(tf.zeros([10], dtype=tf.float64))
 
 	y = tf.matmul(x, W) + b
 
-	y_ = tf.placeholder(tf.float64, [None, 10])
 	cross_entropy = tf.reduce_mean(tf.nn.softmax_cross_entropy_with_logits(labels=y_, logits=y))
 
 	train_step = tf.train.GradientDescentOptimizer(0.5).minimize(cross_entropy)
