@@ -9,7 +9,8 @@ def model_fn(features, targets, mode):
 
 	cross_entropy = tf.reduce_mean(tf.nn.softmax_cross_entropy_with_logits(labels=targets, logits=y))
 
-	train_step = tf.train.GradientDescentOptimizer(0.5).minimize(cross_entropy)
+	train_step = tf.train.GradientDescentOptimizer(0.5).minimize(cross_entropy, 
+		global_step=tf.contrib.framework.get_global_step())
 
 	eval_metric_ops = { "accuracy": tf.metrics.accuracy(targets, y) }
 

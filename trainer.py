@@ -17,12 +17,11 @@ import tensorflow as tf
 
 tf.logging.set_verbosity(tf.logging.INFO)
 
-def main(_):
-	tf.contrib.framework.get_or_create_global_step(graph=None)
-
+MODEL_DIR="tmp/training"
+def main(_):	
 	mnist = input_data.read_data_sets("MNIST_data/", one_hot=True)
 
-	est = tf.contrib.learn.Estimator(model_fn=model_fn)
+	est = tf.contrib.learn.Estimator(model_fn=model_fn, model_dir=MODEL_DIR)
 	exp = tf.contrib.learn.Experiment(estimator=est, 
 										train_input_fn=lambda: input_fn(mnist.train, 100), 
 										eval_input_fn=input_fn(mnist.test, 100))
