@@ -13,7 +13,6 @@ def model_fn(features, targets, mode):
 		global_step=tf.contrib.framework.get_global_step())
 
 	eval_metric_ops = { "accuracy": tf.metrics.accuracy(targets, y) }
-
 	return tf.contrib.learn.ModelFnOps(
 		mode=mode, 
 		predictions=y, 
