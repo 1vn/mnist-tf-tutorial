@@ -3,8 +3,8 @@ import tensorflow as tf
 
 
 def model_fn(features, targets, mode):
-  W = tf.Variable(tf.zeros([784, 10], dtype=tf.float64))
-  b = tf.Variable(tf.zeros([10], dtype=tf.float64))
+  W = tf.Variable(tf.zeros([784, 10]))
+  b = tf.Variable(tf.zeros([10]))
 
   y = tf.matmul(features, W) + b
 

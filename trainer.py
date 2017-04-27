@@ -35,10 +35,10 @@ def main(_):
   exp = tf.contrib.learn.Experiment(
       estimator=est,
       eval_steps=1,
-      min_eval_frequency=500,
+      min_eval_frequency=1,
       train_steps=1000,
       train_input_fn=lambda: input_fn(mnist.train, 100),
-      eval_input_fn=lambda: input_fn(mnist.test, 100),
+      eval_input_fn=lambda: input_fn(mnist.train, 100),
       eval_metrics={"accuracy": accuracy_metric_fn})
   exp.train_and_evaluate()
 

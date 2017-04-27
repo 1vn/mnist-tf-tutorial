@@ -2,7 +2,8 @@ import tensorflow as tf
 
 
 def input_fn(data_set, batch_size):
-  x, y_ = data_set.next_batch(batch_size)
-  return tf.convert_to_tensor(
-      x, dtype=tf.float64), tf.convert_to_tensor(
-          y_, dtype=tf.float64)
+  input_images = tf.constant(data_set.images)
+  input_labels = tf.constant(data_set.labels)
+
+  image, label = tf.train.slice_input_producer([input_images, input_labels])
+  return tf.train.batch([image, label], batch_size=batch_size)
