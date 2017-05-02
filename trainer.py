@@ -9,14 +9,15 @@ from tensorflow.examples.tutorials.mnist import input_data
 from tensorflow.python.saved_model import builder as saved_model_builder
 from tensorflow.python.saved_model import tag_constants
 
-from models.fn import model_fn
+from models.simple_mlp import simple_fn
+from models.simple_autoencoder import autoencoder_fn
 from data.fn import input_fn
 
 import tensorflow as tf
 
-tf.logging.set_verbosity(tf.logging.INFO)
-
 MODEL_DIR = "tmp/training"
+FLAGS = tf.app.flags.FLAGS
+tf.app.flags.DEFINE_string('mode', 'simple', 'simple or autoencoder.')
 
 
 def accuracy_metric_fn(predictions, labels):
@@ -26,6 +27,13 @@ def accuracy_metric_fn(predictions, labels):
 
 
 def main(_):
+
+  print("running in mode: ", FLAGS.mode)
+
+  model_fn = simple_fn
+  if FLAGS.mode == "autoencoder":
+    model_fn = autoencoder_fn
+
   mnist = input_data.read_data_sets("MNIST_data/", one_hot=True)
 
   est = tf.contrib.learn.Estimator(
@@ -38,17 +46,11 @@ def main(_):
       min_eval_frequency=1,
       train_steps=1000,
       train_input_fn=lambda: input_fn(mnist.train, 100),
-      eval_input_fn=lambda: input_fn(mnist.train, 100),
+      eval_input_fn=lambda: input_fn(mnist.test, 100),
       eval_metrics={"accuracy": accuracy_metric_fn})
   exp.train_and_evaluate()
 
 
 if __name__ == '__main__':
-  parser = argparse.ArgumentParser()
-  parser.add_argument(
-      '--data_dir',
-      type=str,
-      default='/tmp/tensorflow/mnist/input_data',
-      help='Directory for storing input data')
-  FLAGS, unparsed = parser.parse_known_args()
-  tf.app.run(main=main, argv=[sys.argv[0]] + unparsed)
+  tf.logging.set_verbosity(tf.logging.INFO)
+  tf.app.run()

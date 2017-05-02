@@ -1,8 +1,7 @@
-from tensorflow.examples.tutorials.mnist import input_data
 import tensorflow as tf
 
 
-def model_fn(features, targets, mode):
+def simple_fn(features, targets, mode):
   W = tf.Variable(tf.zeros([784, 10]))
   b = tf.Variable(tf.zeros([10]))
 
