@@ -33,7 +33,7 @@ def autoencoder_fn(features, _, mode):
         tf.add(tf.matmul(layer_1, weights['decoder_h2']), biases['decoder_b2']))
     return layer_2
 
-  tf.summary.image("input", tf.reshape(features, [-1, 28, 28, 1]), max_output=1)
+  tf.summary.image("input", tf.reshape(features, [-1, 28, 28, 1]))
 
   encoder_op = encoder(features)
   decoder_op = decoder(encoder_op)
@@ -41,7 +41,7 @@ def autoencoder_fn(features, _, mode):
   y_pred = decoder_op
   y_true = features
 
-  tf.summary.image("output", tf.reshape(y_pred, [-1, 28, 28, 1]), max_output=1)
+  tf.summary.image("output", tf.reshape(y_pred, [-1, 28, 28, 1]))
 
   cost = tf.reduce_mean(tf.pow(y_true - y_pred, 2))
   train_step = tf.train.GradientDescentOptimizer(0.1).minimize(
