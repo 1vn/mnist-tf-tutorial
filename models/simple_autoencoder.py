@@ -12,6 +12,7 @@ def autoencoder_fn(features, _, mode):
       'decoder_h1': tf.Variable(tf.random_normal([n_hidden_2, n_hidden_1])),
       'decoder_h2': tf.Variable(tf.random_normal([n_hidden_1, n_input])),
   }
+
   biases = {
       'encoder_b1': tf.Variable(tf.random_normal([n_hidden_1])),
       'encoder_b2': tf.Variable(tf.random_normal([n_hidden_2])),
@@ -43,8 +44,11 @@ def autoencoder_fn(features, _, mode):
 
   tf.summary.image("output", tf.reshape(y_pred, [-1, 28, 28, 1]))
 
-  cost = tf.reduce_mean(tf.pow(y_true - y_pred, 2))
-  train_step = tf.train.GradientDescentOptimizer(0.1).minimize(
+  learning_rate = tf.train.exponential_decay(
+      0.5, tf.contrib.framework.get_global_step(), 25000, 0.9, staircase=True)
+
+  cost = tf.nn.l2_loss(tf.reduce_mean(tf.pow(y_true - y_pred, 2)))
+  train_step = tf.train.GradientDescentOptimizer(learning_rate).minimize(
       cost, global_step=tf.contrib.framework.get_global_step())
 
   return tf.contrib.learn.ModelFnOps(

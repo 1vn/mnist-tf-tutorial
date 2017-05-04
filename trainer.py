@@ -26,6 +26,10 @@ def accuracy_metric_fn(predictions, labels):
   return accuracy
 
 
+def euclidean_metric(predictions, labels):
+  return
+
+
 def main(_):
 
   print("running in mode: ", FLAGS.mode)
@@ -44,7 +48,7 @@ def main(_):
       estimator=est,
       eval_steps=1,
       min_eval_frequency=1,
-      train_steps=20000,
+      train_steps=50000,
       train_input_fn=lambda: input_fn(mnist.train, 100),
       eval_input_fn=lambda: input_fn(mnist.test, 100),
       eval_metrics={"accuracy": accuracy_metric_fn})
