@@ -47,7 +47,7 @@ def autoencoder_fn(features, _, mode):
   learning_rate = tf.train.exponential_decay(
       0.5, tf.contrib.framework.get_global_step(), 25000, 0.9, staircase=True)
 
-  cost = tf.nn.l2_loss(tf.reduce_mean(tf.pow(y_true - y_pred, 2)))
+  cost = tf.reduce_mean(tf.pow(y_true - y_pred, 2))
   train_step = tf.train.GradientDescentOptimizer(learning_rate).minimize(
       cost, global_step=tf.contrib.framework.get_global_step())
 
