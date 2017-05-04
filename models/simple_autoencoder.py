@@ -30,8 +30,8 @@ def autoencoder_fn(features, _, mode):
   def decoder(x):
     layer_1 = tf.nn.sigmoid(
         tf.add(tf.matmul(x, weights['decoder_h1']), biases['decoder_b1']))
-    layer_2 = tf.nn.sigmoid(
-        tf.add(tf.matmul(layer_1, weights['decoder_h2']), biases['decoder_b2']))
+    layer_2 = tf.add(
+        tf.matmul(layer_1, weights['decoder_h2']), biases['decoder_b2'])
     return layer_2
 
   tf.summary.image("input", tf.reshape(features, [-1, 28, 28, 1]))
@@ -45,9 +45,11 @@ def autoencoder_fn(features, _, mode):
   tf.summary.image("output", tf.reshape(y_pred, [-1, 28, 28, 1]))
 
   learning_rate = tf.train.exponential_decay(
-      0.5, tf.contrib.framework.get_global_step(), 25000, 0.9, staircase=True)
+      0.5, tf.contrib.framework.get_global_step(), 10000, 0.9, staircase=False)
 
-  cost = tf.reduce_mean(tf.pow(y_true - y_pred, 2))
+  cost = tf.add(
+      tf.reduce_mean(tf.pow(y_true - y_pred, 2)),
+      tf.nn.l2_loss(weights['decoder_h2']))
   train_step = tf.train.GradientDescentOptimizer(learning_rate).minimize(
       cost, global_step=tf.contrib.framework.get_global_step())
 
