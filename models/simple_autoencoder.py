@@ -45,11 +45,12 @@ def autoencoder_fn(features, _, mode):
   tf.summary.image("output", tf.reshape(y_pred, [-1, 28, 28, 1]))
 
   learning_rate = tf.train.exponential_decay(
-      0.5, tf.contrib.framework.get_global_step(), 10000, 0.9, staircase=False)
+      0.1, tf.contrib.framework.get_global_step(), 10000, 0.9, staircase=False)
 
-  cost = tf.add(
-      tf.reduce_mean(tf.pow(y_true - y_pred, 2)),
-      tf.nn.l2_loss(weights['decoder_h2']))
+  cost = tf.reduce_mean(tf.pow(y_true - y_pred, 2)) + tf.nn.l2_loss(
+      weights['encoder_h1']) + tf.nn.l2_loss(
+          weights['encoder_h2']) + tf.nn.l2_loss(
+              weights['decoder_h1']) + tf.nn.l2_loss(weights['decoder_h2'])
   train_step = tf.train.GradientDescentOptimizer(learning_rate).minimize(
       cost, global_step=tf.contrib.framework.get_global_step())
 
