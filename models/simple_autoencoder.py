@@ -1,5 +1,7 @@
 import tensorflow as tf
 
+DROPOUT_PROB = 0.6
+
 
 def autoencoder_fn(features, _, mode):
 
@@ -39,12 +41,10 @@ def autoencoder_fn(features, _, mode):
   tf.summary.image("input", tf.reshape(features, [-1, 28, 28, 1]))
 
   encoder_op = encoder(features)
+  dropout_op = tf.nn.dropout(encoder_op, DROPOUT_PROB)
+  decoder_op = decoder(dropout_op)
 
-  decoder_op = decoder(encoder_op)
-
-  dropout_op = tf.nn.dropout(decoder_op, 0.6)
-
-  y_pred = dropout_op
+  y_pred = decoder_op
   y_true = features
 
   tf.summary.image("output", tf.reshape(y_pred, [-1, 28, 28, 1]))
@@ -57,11 +57,9 @@ def autoencoder_fn(features, _, mode):
   #     staircase=False)
 
   # cost = tf.reduce_mean(tf.pow(y_true - y_pred, 2)) + tf.nn.l2_loss(
-  #     weights['encoder_h1']
-  # ) + tf.nn.l2_loss(weights['encoder_h2']) + tf.nn.l2_loss(
-  #     weights['encoder_h3']) + tf.nn.l2_loss(
-  #         weights['decoder_h1']) + tf.nn.l2_loss(
-  #             weights['decoder_h2']) + tf.nn.l2_loss(weights['decoder_h3'])
+  #     weights['encoder_h1']) + tf.nn.l2_loss(
+  #         weights['encoder_h2']) + tf.nn.l2_loss(
+  #             weights['decoder_h1']) + tf.nn.l2_loss(weights['decoder_h2'])
   cost = tf.reduce_mean(tf.pow(y_true - y_pred, 2))
 
   train_step = tf.train.AdamOptimizer(0.001).minimize(
