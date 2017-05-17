@@ -11,7 +11,7 @@ from tensorflow.python.saved_model import tag_constants
 
 from models.simple_mlp import simple_fn
 from models.simple_autoencoder import autoencoder_fn
-from data.fn import input_fn
+from data.fn import input_fn, autoencoder_input_fn
 
 import tensorflow as tf
 
@@ -26,9 +26,11 @@ def accuracy_metric_fn(predictions, labels):
   return accuracy
 
 
-def euclidean_distance_metric_fn(predictions, labels):
-
-  return
+def euclidean_distance_metric(predictions, labels):
+  d = tf.sqrt(
+      tf.reduce_sum(
+          tf.square(tf.subtract(predictions, tf.cast(labels, tf.float32))), 1))
+  return d
 
 
 def main(_):
@@ -36,8 +38,10 @@ def main(_):
   print("running in mode: ", FLAGS.mode)
 
   model_fn = simple_fn
+  selected_input_fn = input_fn
   if FLAGS.mode == "autoencoder":
     model_fn = autoencoder_fn
+    selected_input_fn = autoencoder_input_fn
 
   mnist = input_data.read_data_sets("MNIST_data/", one_hot=True)
 
@@ -49,11 +53,13 @@ def main(_):
       estimator=est,
       eval_steps=1,
       min_eval_frequency=1,
-      train_input_fn=lambda: input_fn(mnist.train, 100),
-      eval_input_fn=lambda: input_fn(mnist.test, 100),
+      train_input_fn=lambda: selected_input_fn(mnist.train, 100),
+      eval_input_fn=lambda: selected_input_fn(mnist.test, 100),
       eval_metrics={
-          "accuracy": accuracy_metric_fn,
-          "euclidean_distance": euclidean_distance_metric_fn
+          "accuracy":
+          tf.contrib.learn.MetricSpec(metric_fn=accuracy_metric_fn),
+          "euclidean distance":
+          tf.contrib.learn.MetricSpec(metric_fn=euclidean_distance_metric)
       })
   exp.train_and_evaluate()
 
