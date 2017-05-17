@@ -20,13 +20,8 @@ FLAGS = tf.app.flags.FLAGS
 tf.app.flags.DEFINE_string('mode', 'simple', 'simple or autoencoder.')
 
 
-def accuracy_metric_fn(predictions, labels):
-  correct_prediction = tf.equal(tf.argmax(labels, 1), tf.argmax(predictions, 1))
-  accuracy = tf.reduce_mean(tf.cast(correct_prediction, tf.float32))
-  return accuracy
+def euclidean_distance_metric_fn(predictions, labels):
 
-
-def euclidean_metric(predictions, labels):
   return
 
 
@@ -50,7 +45,9 @@ def main(_):
       min_eval_frequency=1,
       train_input_fn=lambda: input_fn(mnist.train, 100),
       eval_input_fn=lambda: input_fn(mnist.test, 100),
-      eval_metrics={"accuracy": accuracy_metric_fn})
+      eval_metrics={
+          "accuracy": tf.metrics.accuracy,
+      })
   exp.train_and_evaluate()
 
 
