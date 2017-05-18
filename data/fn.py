@@ -15,3 +15,7 @@ def autoencoder_input_fn(data_set, batch_size):
 
   image, label = tf.train.slice_input_producer([input_images, input_labels])
   return tf.train.batch([image, image], batch_size=batch_size)
+
+
+def lstm_input_fn(data_set, batch_size):
+  return
