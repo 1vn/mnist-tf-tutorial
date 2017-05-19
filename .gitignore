@@ -1,4 +1,4 @@
 MNIST_data/
-
+LANG_data/
 *.pyc
 tmp
