@@ -114,8 +114,12 @@ def autoencoder_fn(features, _, mode):
   tf.summary.image("input", tf.reshape(features, [-1, 28, 28, 1]))
 
   encoder_op = encoder(features)
-  dropout_op = tf.nn.dropout(encoder_op, DROPOUT_PROB)
-  decoder_op = decoder(dropout_op)
+
+  if (mode == tf.contrib.learn.ModeKeys.TRAIN):
+    dropout_op = tf.nn.dropout(encoder_op, DROPOUT_PROB)
+    decoder_op = decoder(dropout_op)
+  else:
+    decoder_op = decoder(encoder_op)
 
   y_pred = decoder_op
   y_true = features

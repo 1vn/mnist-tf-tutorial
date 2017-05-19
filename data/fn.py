@@ -22,25 +22,33 @@ def autoencoder_input_fn(data_set, batch_size):
   return tf.train.batch([image, image], batch_size=batch_size)
 
 
-def lstm_input_fn(data_set, batch_size, train_buckets_scale):
-  random_number_01 = np.random.random_sample()
-  bucket_id = min([
-      i for i in xrange(len(train_buckets_scale))
-      if train_buckets_scale[i] > random_number_01
-  ])
+#https://github.com/ematvey/tensorflow-seq2seq-tutorials/blob/master/helpers.py
+def batch(inputs, max_sequence_length=None):
+  sequence_lengths = [len(seq) for seq in inputs]
+  batch_size = len(inputs)
 
-  encoder_size, decoder_size = _buckets[bucket_id]
-  encoder_inputs, decoder_inputs = [], []
-  batch_encoder_inputs, batch_decoder_inputs = [], []
+  if max_sequence_length is None:
+    max_sequence_length = max(sequence_lengths)
 
-  for _ in xrange(batch_size):
-    encoder_input, decoder_input = random.choice(data_set[bucket_id])
+  inputs_batch_major = np.zeros(
+      shape=[batch_size, max_sequence_length], dtype=np.int32)  # == PAD
 
-    encoder_pad = [data_utils.PAD_ID] * (encoder_size - len(encoder_input))
-    encoder_inputs.append(list(reversed(encoder_input + encoder_pad)))
+  for i, seq in enumerate(inputs):
+    for j, element in enumerate(seq):
+      inputs_batch_major[i, j] = element
 
-    decoder_pad_size = decoder_size - len(decoder_input) - 1
-    decoder_inputs.append([data_utils.GO_ID] + decoder_input +
-                          [data_utils.PAD_ID] * decoder_pad_size)
+  # [batch_size, max_time] -> [max_time, batch_size]
+  inputs_time_major = inputs_batch_major.swapaxes(0, 1)
 
-  return tf.train.batch([encoder_inputs, decoder_inputs], batch_size=batch_size)
+  return inputs_time_major, sequence_lengths
+
+
+def lstm_input_fn(data_set, batch_size):
+  print(data_set[0])
+  input_features = tf.constant([i[0] for i in data_set])
+  input_labels = tf.constant([i[1] for i in data_set])
+
+  features, labels = tf.train.slice_input_producer(
+      [input_features, input_labels])
+
+  return tf.train.batch([features, labels], batch_size=batch_size)

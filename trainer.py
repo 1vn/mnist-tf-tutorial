@@ -27,7 +27,7 @@ _buckets = [(5, 10), (10, 15), (20, 25), (40, 50)]
 
 #https://github.com/tensorflow/models/blob/master/tutorials/rnn/translate/translate.py
 def read_data(source_path, target_path, max_size=None):
-  data_set = [[] for _ in _buckets]
+  data_set = []
   with tf.gfile.GFile(source_path, mode="r") as source_file:
     with tf.gfile.GFile(target_path, mode="r") as target_file:
       source, target = source_file.readline(), target_file.readline()
@@ -40,10 +40,7 @@ def read_data(source_path, target_path, max_size=None):
         source_ids = [int(x) for x in source.split()]
         target_ids = [int(x) for x in target.split()]
         target_ids.append(data_utils.EOS_ID)
-        for bucket_id, (source_size, target_size) in enumerate(_buckets):
-          if len(source_ids) < source_size and len(target_ids) < target_size:
-            data_set[bucket_id].append([source_ids, target_ids])
-            break
+        data_set.append([source_ids, target_ids])
         source, target = source_file.readline(), target_file.readline()
   return data_set
 
@@ -68,6 +65,7 @@ def main(_):
   print("running with model: ", FLAGS.model)
 
   model_fn = simple_fn
+  model_params = None
   selected_input_fn = input_fn
   eval_metrics = {
       "accuracy": tf.contrib.learn.MetricSpec(metric_fn=accuracy_metric_fn)
@@ -82,7 +80,7 @@ def main(_):
     eval_metrics["euclidean distance"] = tf.contrib.learn.MetricSpec(
         metric_fn=euclidean_distance_metric)
   elif FLAGS.model == "lstm":
-    from_train, to_train, from_dev, to_dev, _, _ = data_utils.prepare_wmt_data(
+    from_train, to_train, from_dev, to_dev, from_vocab, to_vocab = data_utils.prepare_wmt_data(
         "LANG_data/",
         4000,
         4000,)
@@ -99,9 +97,9 @@ def main(_):
         sum(train_bucket_sizes[:i + 1]) / train_total_size
         for i in xrange(len(train_bucket_sizes))
     ]
-    train_input_fn = lambda: selected_input_fn(train_set, 100, train_buckets_scale)
-    eval_input_fn = lambda: selected_input_fn(dev_set, 100, train_buckets_scale)
-
+    train_input_fn = lambda: selected_input_fn(train_set, 100)
+    eval_input_fn = lambda: selected_input_fn(dev_set, 100)
+    model_params = {"train_buckets_scale": train_buckets_scale}
     model_fn = lstm_fn
 
   if (FLAGS.model == "simple" or FLAGS.model == "autoencoder"):
@@ -112,6 +110,7 @@ def main(_):
   est = tf.contrib.learn.Estimator(
       model_fn=model_fn,
       model_dir=MODEL_DIR,
+      params=model_params,
       config=tf.contrib.learn.RunConfig(save_checkpoints_secs=30))
   exp = tf.contrib.learn.Experiment(
       estimator=est,
